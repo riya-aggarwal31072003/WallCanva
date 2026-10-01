@@ -1,0 +1,19 @@
+# dependencies
+node_modules/
+
+# environment variables (never commit these)
+.env
+.env.*
+!.env.example
+
+# logs
+*.log
+npm-debug.log*
+
+# build output
+dist/
+.angular/
+
+# OS and editor files
+.DS_Store
+Thumbs.db
