@@ -4,6 +4,8 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const authRoutes = require('./routes/authRoutes'); 
 const errorHandler = require('./middleware/errorHandler');
+const colorRoutes = require('./routes/colorRoutes');
+const patternRoutes = require('./routes/patternRoutes');
 
 const app = express();
 
@@ -17,6 +19,8 @@ app.get('/api/health', (req, res) => {
 });
 
 app.use('/api/auth', authRoutes);
+app.use('/api/colors', colorRoutes);
+app.use('/api/patterns', patternRoutes);
 app.use(errorHandler);
 
 module.exports = app;
