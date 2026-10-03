@@ -60,3 +60,6 @@ exports.login = async (req, res, next) => {
     next(err);
   }
 };
+exports.me = (req, res) => {
+  res.json({ user: publicUser(req.user) });
+};
