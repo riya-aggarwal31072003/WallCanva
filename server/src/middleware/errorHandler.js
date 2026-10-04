@@ -1,6 +1,9 @@
 module.exports = function errorHandler(err, req, res, next) {
   console.error(err);
 
+  if (err.code === 'LIMIT_FILE_SIZE') {
+    return res.status(400).json({ message: 'Image must be 5 MB or smaller' });
+  }
   if (err.name === 'ValidationError') {
     return res.status(400).json({ message: err.message });
   }
