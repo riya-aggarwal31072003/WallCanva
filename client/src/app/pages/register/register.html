@@ -1,0 +1,40 @@
+<<div class="card">
+  <h2>Create your account</h2>
+  <p class="sub">Start designing your walls.</p>
+
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <label>
+      Name
+      <input type="text" formControlName="name" />
+    </label>
+    @if (form.controls.name.touched && form.controls.name.invalid) {
+      <small class="err">Name is required.</small>
+    }
+
+    <label>
+      Email
+      <input type="email" formControlName="email" />
+    </label>
+    @if (form.controls.email.touched && form.controls.email.invalid) {
+      <small class="err">Enter a valid email.</small>
+    }
+
+    <label>
+      Password
+      <input type="password" formControlName="password" />
+    </label>
+    @if (form.controls.password.touched && form.controls.password.invalid) {
+      <small class="err">At least 6 characters.</small>
+    }
+
+    @if (error()) {
+      <div class="alert">{{ error() }}</div>
+    }
+
+    <button type="submit" [disabled]="loading()">
+      {{ loading() ? 'Creating...' : 'Register' }}
+    </button>
+  </form>
+
+  <p class="foot">Already have an account? <a routerLink="/login">Login</a></p>
+</div>
