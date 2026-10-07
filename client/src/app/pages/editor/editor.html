@@ -1,1 +1,13 @@
-<p>editor works!</p>
+<h2>{{ project()?.title ?? 'Editor' }}</h2>
+
+@if (loading()) { <p>Loading image...</p> }
+@if (error()) { <div class="alert">{{ error() }}</div> }
+
+<div #stage class="stage">
+  <canvas #base class="layer"></canvas>
+  <canvas #overlay class="layer top"></canvas>
+</div>
+
+<p class="disclaimer">
+  Colours may vary due to lighting, screen calibration and wall texture.
+</p>
