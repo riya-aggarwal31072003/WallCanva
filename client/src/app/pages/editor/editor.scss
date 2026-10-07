@@ -1,0 +1,11 @@
+.stage {
+  position: relative;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+.stage canvas { display: block; }
+.layer { position: relative; }
+.layer.top { position: absolute; top: 0; left: 50%; transform: translateX(-50%); }
+.alert { background: #fee2e2; color: #991b1b; padding: 10px; border-radius: 4px; }
+.disclaimer { color: #6b7280; font-size: 13px; margin-top: 12px; }
