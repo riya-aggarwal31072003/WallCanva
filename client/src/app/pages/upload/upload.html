@@ -1,1 +1,22 @@
-<p>upload works!</p>
+<div class="card">
+  <h2>New design</h2>
+  <p class="sub">Upload a clear photo of your room (JPG or PNG, up to 5 MB).</p>
+  <p class="note">Only upload photos you own.</p>
+
+  <input type="text" placeholder="Design name (optional)"
+         (input)="title.set($any($event.target).value)" />
+
+  <input type="file" accept="image/jpeg,image/png" (change)="onFile($event)" />
+
+  @if (preview()) {
+    <img class="preview" [src]="preview()" alt="Room preview" />
+  }
+
+  @if (error()) {
+    <div class="alert">{{ error() }}</div>
+  }
+
+  <button type="button" [disabled]="!file() || loading()" (click)="submit()">
+    {{ loading() ? 'Uploading...' : 'Upload and start painting' }}
+  </button>
+</div>
