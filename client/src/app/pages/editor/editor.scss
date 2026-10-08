@@ -1,11 +1,20 @@
+.toolbar { display: flex; align-items: center; gap: 10px; margin: 8px 0 12px; }
+.toolbar button {
+  padding: 8px 14px; background: #2563eb; color: #fff; border: 0; border-radius: 4px; cursor: pointer;
+  &.secondary { background: #6b7280; }
+}
+.hint { color: #6b7280; font-size: 14px; }
 .stage {
-  position: relative;
   width: 100%;
   display: flex;
   justify-content: center;
 }
-.stage canvas { display: block; }
-.layer { position: relative; }
-.layer.top { position: absolute; top: 0; left: 50%; transform: translateX(-50%); }
-.alert { background: #fee2e2; color: #991b1b; padding: 10px; border-radius: 4px; }
-.disclaimer { color: #6b7280; font-size: 13px; margin-top: 12px; }
+.wrap { position: relative; line-height: 0; }
+.wrap canvas { display: block; }
+.wrap .top { position: absolute; top: 0; left: 0; }
+.wrap .top.drawing { cursor: crosshair; }
+.list { margin-top: 12px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.chip {
+  background: #e0e7ff; color: #1e3a8a; padding: 4px 10px; border-radius: 999px; font-size: 13px;
+  button { margin-left: 6px; border: 0; background: transparent; cursor: pointer; color: #1e3a8a; }
+}

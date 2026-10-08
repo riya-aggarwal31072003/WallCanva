@@ -3,10 +3,37 @@
 @if (loading()) { <p>Loading image...</p> }
 @if (error()) { <div class="alert">{{ error() }}</div> }
 
-<div #stage class="stage">
-  <canvas #base class="layer"></canvas>
-  <canvas #overlay class="layer top"></canvas>
+<div class="toolbar">
+  @if (!drawing()) {
+    <button type="button" (click)="startPolygon()">Select wall area</button>
+  } @else {
+    <button type="button" (click)="undoPoint()">Undo point</button>
+    <button type="button" class="secondary" (click)="cancelPolygon()">Cancel</button>
+    <span class="hint">Click to add points. Click the red point to close the shape.</span>
+  }
 </div>
+
+<div #stage class="stage">
+  <div class="wrap">
+    <canvas #base class="base"></canvas>
+    <canvas #overlay class="top"
+            [class.drawing]="drawing()"
+            (click)="onCanvasClick($event)"
+            (mousemove)="onCanvasMove($event)"></canvas>
+  </div>
+</div>
+
+@if (selections().length) {
+  <div class="list">
+    <strong>Selections:</strong>
+    @for (s of selections(); track $index) {
+      <span class="chip">
+        Area {{ $index + 1 }} ({{ s.points.length }} points)
+        <button type="button" (click)="deleteSelection($index)">x</button>
+      </span>
+    }
+  </div>
+}
 
 <p class="disclaimer">
   Colours may vary due to lighting, screen calibration and wall texture.
