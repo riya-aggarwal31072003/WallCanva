@@ -13,6 +13,20 @@
   }
 </div>
 
+<div class="palette">
+  @for (c of colors(); track c._id) {
+    <button type="button" class="swatch" [style.background]="c.hex"
+            [title]="c.name" (click)="pickColor(c)"></button>
+  }
+  @if (!colors().length) { <small>No colours yet. Add some as admin.</small> }
+</div>
+
+<label class="slider">
+  Opacity {{ (opacity() * 100) | number:'1.0-0' }}%
+  <input type="range" min="0" max="1" step="0.05"
+         [value]="opacity()" (input)="setOpacity(+$any($event.target).value)" />
+</label>
+
 <div #stage class="stage">
   <div class="wrap">
     <canvas #base class="base"></canvas>
@@ -27,9 +41,9 @@
   <div class="list">
     <strong>Selections:</strong>
     @for (s of selections(); track $index) {
-      <span class="chip">
+      <span class="chip" [class.active]="$index === selectedIndex()" (click)="selectArea($index)">
         Area {{ $index + 1 }} ({{ s.points.length }} points)
-        <button type="button" (click)="deleteSelection($index)">x</button>
+        <button type="button" (click)="deleteSelection($index); $event.stopPropagation()">x</button>
       </span>
     }
   </div>

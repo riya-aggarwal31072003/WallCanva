@@ -3,9 +3,12 @@ import {
 } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Point, Project, ProjectService, Selection } from '../../core/services/project';
+import { ColorService, PaintColor } from '../../core/services/color';
+import { DecimalPipe } from '@angular/common';
 
 @Component({
   selector: 'app-editor',
+  imports: [DecimalPipe],
   templateUrl: './editor.html',
   styleUrl: './editor.scss',
 })
@@ -24,6 +27,14 @@ export class Editor implements AfterViewInit {
   // tool state
   drawing = signal(false);
   selections = signal<Selection[]>([]);
+
+  private colorsApi = inject(ColorService);
+  colors = signal<PaintColor[]>([]);
+  activeHex = signal('#4A90B8');
+  activeColorId = signal<string | undefined>(undefined);
+  opacity = signal(0.7);
+  selectedIndex = signal<number | null>(null);
+
   private current: Point[] = [];   // points of the shape being drawn
   private cursor: Point | null = null;
 
@@ -43,6 +54,7 @@ export class Editor implements AfterViewInit {
         this.error.set('Could not load this design.');
       },
     });
+    this.colorsApi.list().subscribe((c) => this.colors.set(c));
   }
 
   private loadImage(url: string) {
@@ -101,6 +113,34 @@ export class Editor implements AfterViewInit {
     this.selections.update((list) => list.filter((_, i) => i !== index));
     this.redraw();
   }
+  
+    pickColor(c: PaintColor) {
+    this.activeHex.set(c.hex);
+    this.activeColorId.set(c._id);
+    this.applyToSelected({ hex: c.hex, colorId: c._id });
+  }
+
+  setOpacity(value: number) {
+    this.opacity.set(value);
+    this.applyToSelected({ opacity: value });
+  }
+
+  selectArea(i: number) {
+    this.selectedIndex.set(i);
+    const s = this.selections()[i];
+    this.activeHex.set(s.hex);
+    this.activeColorId.set(s.colorId);
+    this.opacity.set(s.opacity);
+    this.redraw();
+  }
+
+  private applyToSelected(patch: Partial<Selection>) {
+    const i = this.selectedIndex();
+    if (i === null) return;
+    this.selections.update((list) =>
+      list.map((s, idx) => (idx === i ? { ...s, ...patch } : s)));
+    this.redraw();
+  }
 
   // ---------- mouse handling ----------
 
@@ -143,37 +183,55 @@ export class Editor implements AfterViewInit {
     this.redraw();
   }
 
-  private finishPolygon() {
+    private finishPolygon() {
     const selection: Selection = {
       points: [...this.current],
-      hex: '#4A90B8',   // placeholder colour; real colours come on Day 9
-      opacity: 0.7,
+      hex: this.activeHex(),
+      colorId: this.activeColorId(),
+      opacity: this.opacity(),
     };
     this.selections.update((list) => [...list, selection]);
+    this.selectedIndex.set(this.selections().length - 1);
     this.current = [];
     this.cursor = null;
     this.drawing.set(false);
     this.redraw();
   }
 
+    
+
   // ---------- drawing ----------
 
-  private redraw() {
+      private redraw() {
     const c = this.overlayRef.nativeElement;
     const ctx = c.getContext('2d')!;
     ctx.clearRect(0, 0, c.width, c.height);
 
-    // finished selections
-    for (const sel of this.selections()) {
-      this.tracePath(ctx, sel.points, c.width, c.height, true);
-      ctx.fillStyle = 'rgba(37, 99, 235, 0.25)';
-      ctx.fill();
-      ctx.strokeStyle = '#2563eb';
-      ctx.lineWidth = 2;
-      ctx.stroke();
-    }
+    // photo first, so multiply has something to blend with
+    ctx.drawImage(this.img, 0, 0, c.width, c.height);
 
-    // shape being drawn
+    // paint each area: clip to the polygon, then multiply the colour
+    this.selections().forEach((sel, i) => {
+      ctx.save();
+      this.tracePath(ctx, sel.points, c.width, c.height, true);
+      ctx.clip();
+      ctx.globalAlpha = sel.opacity;
+      ctx.globalCompositeOperation = 'multiply';
+      ctx.fillStyle = sel.hex;
+      ctx.fillRect(0, 0, c.width, c.height);
+      ctx.restore();
+
+      if (i === this.selectedIndex()) {
+        this.tracePath(ctx, sel.points, c.width, c.height, true);
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([5, 4]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+    });
+
+    // shape currently being drawn
     if (this.current.length > 0) {
       const pts = this.cursor ? [...this.current, this.cursor] : this.current;
       this.tracePath(ctx, pts, c.width, c.height, false);
@@ -182,7 +240,6 @@ export class Editor implements AfterViewInit {
       ctx.setLineDash([6, 4]);
       ctx.stroke();
       ctx.setLineDash([]);
-
       this.current.forEach((pt, i) => {
         ctx.beginPath();
         ctx.arc(pt.x * c.width, pt.y * c.height, i === 0 ? 6 : 4, 0, Math.PI * 2);
