@@ -34,6 +34,7 @@ export class Editor implements AfterViewInit {
   activeColorId = signal<string | undefined>(undefined);
   opacity = signal(0.7);
   selectedIndex = signal<number | null>(null);
+    blend = signal<'multiply' | 'overlay' | 'soft-light'>('multiply');
 
   private current: Point[] = [];   // points of the shape being drawn
   private cursor: Point | null = null;
@@ -131,6 +132,19 @@ export class Editor implements AfterViewInit {
     this.activeHex.set(s.hex);
     this.activeColorId.set(s.colorId);
     this.opacity.set(s.opacity);
+    this.blend.set(s.blend ?? 'multiply');
+    this.redraw();
+  }
+
+    setBlend(value: 'multiply' | 'overlay' | 'soft-light') {
+    this.blend.set(value);
+    this.applyToSelected({ blend: value });
+  }
+
+  duplicateColorToAll() {
+    const hex = this.activeHex();
+    const colorId = this.activeColorId();
+    this.selections.update((list) => list.map((s) => ({ ...s, hex, colorId })));
     this.redraw();
   }
 
@@ -189,6 +203,7 @@ export class Editor implements AfterViewInit {
       hex: this.activeHex(),
       colorId: this.activeColorId(),
       opacity: this.opacity(),
+      blend: this.blend(),
     };
     this.selections.update((list) => [...list, selection]);
     this.selectedIndex.set(this.selections().length - 1);
@@ -216,7 +231,7 @@ export class Editor implements AfterViewInit {
       this.tracePath(ctx, sel.points, c.width, c.height, true);
       ctx.clip();
       ctx.globalAlpha = sel.opacity;
-      ctx.globalCompositeOperation = 'multiply';
+            ctx.globalCompositeOperation = sel.blend ?? 'multiply';
       ctx.fillStyle = sel.hex;
       ctx.fillRect(0, 0, c.width, c.height);
       ctx.restore();
