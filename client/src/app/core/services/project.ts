@@ -15,6 +15,7 @@ export interface Selection {
   hex: string;
   opacity: number;
   finish?: 'matte' | 'satin' | 'glossy';
+    blend?: 'multiply' | 'overlay' | 'soft-light';
 }
 
 export interface Project {
