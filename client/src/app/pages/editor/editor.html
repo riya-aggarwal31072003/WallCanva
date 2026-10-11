@@ -13,6 +13,9 @@
   }
 </div>
 
+  <button type="button" class="secondary" [disabled]="!canUndo()" (click)="undo()">Undo</button>
+  <button type="button" class="secondary" [disabled]="!canRedo()" (click)="redo()">Redo</button>
+
 <div class="palette">
   @for (c of colors(); track c._id) {
     <button type="button" class="swatch" [style.background]="c.hex"
@@ -24,7 +27,9 @@
 <label class="slider">
   Opacity {{ (opacity() * 100) | number:'1.0-0' }}%
   <input type="range" min="0" max="1" step="0.05"
-         [value]="opacity()" (input)="setOpacity(+$any($event.target).value)" />
+       [value]="opacity()"
+       (pointerdown)="startOpacityChange()"
+       (input)="setOpacity(+$any($event.target).value)" />
 </label>
 <label class="slider">
   Blend
@@ -47,7 +52,10 @@
     <canvas #overlay class="top"
             [class.drawing]="drawing()"
             (click)="onCanvasClick($event)"
-            (mousemove)="onCanvasMove($event)"></canvas>
+            (mousemove)="onCanvasMove($event)"
+            (mousedown)="onCanvasDown($event)"
+            (mouseup)="onCanvasUp()"
+            (mouseleave)="onCanvasUp()"></canvas>
   </div>
 </div>
 

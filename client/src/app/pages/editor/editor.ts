@@ -35,6 +35,14 @@ export class Editor implements AfterViewInit {
   opacity = signal(0.7);
   selectedIndex = signal<number | null>(null);
     blend = signal<'multiply' | 'overlay' | 'soft-light'>('multiply');
+      
+  private undoStack: Selection[][] = [];
+  private redoStack: Selection[][] = [];
+  canUndo = signal(false);
+  canRedo = signal(false);
+
+  private dragIndex: number | null = null;
+  private readonly HIT_DIST = 10;
 
   private current: Point[] = [];   // points of the shape being drawn
   private cursor: Point | null = null;
@@ -111,11 +119,14 @@ export class Editor implements AfterViewInit {
   }
 
   deleteSelection(index: number) {
+    this.selectedIndex.set(null);
+    this.snapshot();
     this.selections.update((list) => list.filter((_, i) => i !== index));
     this.redraw();
   }
   
     pickColor(c: PaintColor) {
+    this.snapshot();
     this.activeHex.set(c.hex);
     this.activeColorId.set(c._id);
     this.applyToSelected({ hex: c.hex, colorId: c._id });
@@ -137,11 +148,13 @@ export class Editor implements AfterViewInit {
   }
 
     setBlend(value: 'multiply' | 'overlay' | 'soft-light') {
+    this.snapshot();
     this.blend.set(value);
     this.applyToSelected({ blend: value });
   }
 
   duplicateColorToAll() {
+    this.snapshot();
     const hex = this.activeHex();
     const colorId = this.activeColorId();
     this.selections.update((list) => list.map((s) => ({ ...s, hex, colorId })));
@@ -189,15 +202,30 @@ export class Editor implements AfterViewInit {
     this.redraw();
   }
 
-  onCanvasMove(e: MouseEvent) {
-    if (!this.drawing() || this.current.length === 0) return;
+    onCanvasMove(e: MouseEvent) {
     const c = this.overlayRef.nativeElement;
     const p = this.toCanvasPoint(e);
+
+    if (this.dragIndex !== null) {
+      const i = this.selectedIndex()!;
+      const x = Math.min(Math.max(p.x / c.width, 0), 1);
+      const y = Math.min(Math.max(p.y / c.height, 0), 1);
+      this.selections.update((list) =>
+        list.map((s, idx) =>
+          idx === i
+            ? { ...s, points: s.points.map((pt, n) => (n === this.dragIndex ? { x, y } : pt)) }
+            : s));
+      this.redraw();
+      return;
+    }
+
+    if (!this.drawing() || this.current.length === 0) return;
     this.cursor = { x: p.x / c.width, y: p.y / c.height };
     this.redraw();
   }
 
     private finishPolygon() {
+      this.snapshot();
     const selection: Selection = {
       points: [...this.current],
       hex: this.activeHex(),
@@ -243,6 +271,17 @@ export class Editor implements AfterViewInit {
         ctx.setLineDash([5, 4]);
         ctx.stroke();
         ctx.setLineDash([]);
+
+        sel.points.forEach((pt) => {
+          ctx.beginPath();
+          ctx.arc(pt.x * c.width, pt.y * c.height, 5, 0, Math.PI * 2);
+          ctx.fillStyle = '#ffffff';
+          ctx.fill();
+          ctx.strokeStyle = '#2563eb';
+          ctx.lineWidth = 2;
+          ctx.setLineDash([]);
+          ctx.stroke();
+        });
       }
     });
 
@@ -271,5 +310,75 @@ export class Editor implements AfterViewInit {
     pts.forEach((p, i) =>
       i === 0 ? ctx.moveTo(p.x * w, p.y * h) : ctx.lineTo(p.x * w, p.y * h));
     if (close) ctx.closePath();
+  }
+  // ---------- history ----------
+
+  private snapshot() {
+    this.undoStack.push(JSON.parse(JSON.stringify(this.selections())));
+    if (this.undoStack.length > 50) this.undoStack.shift();
+    this.redoStack = [];
+    this.updateHistoryFlags();
+  }
+
+  private updateHistoryFlags() {
+    this.canUndo.set(this.undoStack.length > 0);
+    this.canRedo.set(this.redoStack.length > 0);
+  }
+
+  undo() {
+    const prev = this.undoStack.pop();
+    if (!prev) return;
+    this.redoStack.push(JSON.parse(JSON.stringify(this.selections())));
+    this.selections.set(prev);
+    this.selectedIndex.set(null);
+    this.updateHistoryFlags();
+    this.redraw();
+  }
+
+  redo() {
+    const next = this.redoStack.pop();
+    if (!next) return;
+    this.undoStack.push(JSON.parse(JSON.stringify(this.selections())));
+    this.selections.set(next);
+    this.selectedIndex.set(null);
+    this.updateHistoryFlags();
+    this.redraw();
+  }
+
+  @HostListener('window:keydown', ['$event'])
+  onKey(e: KeyboardEvent) {
+    if (!(e.ctrlKey || e.metaKey)) return;
+    const k = e.key.toLowerCase();
+    if (k === 'z' && !e.shiftKey) { e.preventDefault(); this.undo(); }
+    if (k === 'y' || (k === 'z' && e.shiftKey)) { e.preventDefault(); this.redo(); }
+  }
+
+  startOpacityChange() {
+    this.snapshot();
+  }
+
+    private hitPoint(p: { x: number; y: number }): number | null {
+    const i = this.selectedIndex();
+    if (i === null) return null;
+    const c = this.overlayRef.nativeElement;
+    const pts = this.selections()[i].points;
+    for (let n = 0; n < pts.length; n++) {
+      const d = Math.hypot(p.x - pts[n].x * c.width, p.y - pts[n].y * c.height);
+      if (d <= this.HIT_DIST) return n;
+    }
+    return null;
+  }
+
+  onCanvasDown(e: MouseEvent) {
+    if (this.drawing()) return;
+    const hit = this.hitPoint(this.toCanvasPoint(e));
+    if (hit !== null) {
+      this.snapshot();
+      this.dragIndex = hit;
+    }
+  }
+
+  onCanvasUp() {
+    this.dragIndex = null;
   }
 }
