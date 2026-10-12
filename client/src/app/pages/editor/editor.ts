@@ -386,4 +386,19 @@ export class Editor implements AfterViewInit {
   setCompare(value: number) {
     this.compare.set(value);
   }
+
+    download() {
+    const c = this.overlayRef.nativeElement;
+    const prev = this.selectedIndex();
+    this.selectedIndex.set(null);
+    this.redraw();
+
+    const link = document.createElement('a');
+    link.download = `${this.project()?.title || 'wallcanva-design'}.png`;
+    link.href = c.toDataURL('image/png');
+    link.click();
+
+    this.selectedIndex.set(prev);
+    this.redraw();
+  }
 }
