@@ -35,6 +35,7 @@ export class Editor implements AfterViewInit {
   opacity = signal(0.7);
   selectedIndex = signal<number | null>(null);
     blend = signal<'multiply' | 'overlay' | 'soft-light'>('multiply');
+    compare = signal(100); // 100 = fully painted, 0 = fully original
       
   private undoStack: Selection[][] = [];
   private redoStack: Selection[][] = [];
@@ -380,5 +381,9 @@ export class Editor implements AfterViewInit {
 
   onCanvasUp() {
     this.dragIndex = null;
+  }
+
+  setCompare(value: number) {
+    this.compare.set(value);
   }
 }

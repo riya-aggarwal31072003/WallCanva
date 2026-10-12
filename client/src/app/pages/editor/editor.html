@@ -39,6 +39,12 @@
     <option value="soft-light">Soft light (subtle)</option>
   </select>
 </label>
+<label class="slider">
+  Before / After
+  <input type="range" min="0" max="100" step="1"
+         [value]="compare()" (input)="setCompare(+$any($event.target).value)" />
+  <small>{{ compare() }}% painted</small>
+</label>
 
 @if (selections().length > 1) {
   <button type="button" class="secondary-btn" (click)="duplicateColorToAll()">
@@ -51,6 +57,7 @@
     <canvas #base class="base"></canvas>
     <canvas #overlay class="top"
             [class.drawing]="drawing()"
+            [style.clip-path]="'inset(0 ' + (100 - compare()) + '% 0 0)'"
             (click)="onCanvasClick($event)"
             (mousemove)="onCanvasMove($event)"
             (mousedown)="onCanvasDown($event)"
