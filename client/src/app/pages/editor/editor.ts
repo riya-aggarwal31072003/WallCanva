@@ -36,6 +36,9 @@ export class Editor implements AfterViewInit {
   selectedIndex = signal<number | null>(null);
     blend = signal<'multiply' | 'overlay' | 'soft-light'>('multiply');
     compare = signal(100); // 100 = fully painted, 0 = fully original
+
+      saving = signal(false);
+  saveMessage = signal('');
       
   private undoStack: Selection[][] = [];
   private redoStack: Selection[][] = [];
@@ -400,5 +403,23 @@ export class Editor implements AfterViewInit {
 
     this.selectedIndex.set(prev);
     this.redraw();
+  }
+    save() {
+    const p = this.project();
+    if (!p) return;
+    this.saving.set(true);
+    this.saveMessage.set('');
+
+    this.projects.update(p._id, { selections: this.selections() }).subscribe({
+      next: () => {
+        this.saving.set(false);
+        this.saveMessage.set('Saved');
+        setTimeout(() => this.saveMessage.set(''), 2000);
+      },
+      error: (err) => {
+        this.saving.set(false);
+        this.saveMessage.set(err.error?.message || 'Save failed');
+      },
+    });
   }
 }

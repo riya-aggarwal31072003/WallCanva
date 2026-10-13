@@ -11,10 +11,14 @@
     <button type="button" class="secondary" (click)="cancelPolygon()">Cancel</button>
     <span class="hint">Click to add points. Click the red point to close the shape.</span>
   }
-</div>
-  <button type="button" (click)="download()">Download image</button>
   <button type="button" class="secondary" [disabled]="!canUndo()" (click)="undo()">Undo</button>
   <button type="button" class="secondary" [disabled]="!canRedo()" (click)="redo()">Redo</button>
+  <button type="button" (click)="download()">Download image</button>
+  <button type="button" [disabled]="saving()" (click)="save()">
+    {{ saving() ? 'Saving...' : 'Save design' }}
+  </button>
+  <span class="hint">{{ saveMessage() }}</span>
+</div>
 
 <div class="palette">
   @for (c of colors(); track c._id) {
