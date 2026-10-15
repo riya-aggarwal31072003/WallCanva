@@ -54,4 +54,8 @@ export class ProjectService {
   remove(id: string) {
     return this.http.delete<{ message: string }>(`${this.base}/${id}`);
   }
+
+  duplicate(id: string) {
+    return this.http.post<Project>(`${this.base}/${id}/duplicate`, {});
+  }
 }

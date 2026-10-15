@@ -17,4 +17,12 @@ export class ColorService {
   list() {
     return this.http.get<PaintColor[]>(`${environment.apiUrl}/colors`);
   }
+
+    favourites() {
+    return this.http.get<string[]>(`${environment.apiUrl}/users/favourites/colors`);
+  }
+
+  toggleFavourite(id: string) {
+    return this.http.post<string[]>(`${environment.apiUrl}/users/favourites/colors/${id}`, {});
+  }
 }
