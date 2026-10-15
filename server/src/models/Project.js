@@ -6,6 +6,7 @@ const selectionSchema = new mongoose.Schema(
     points: [{ x: Number, y: Number }],
     colorId: { type: mongoose.Schema.Types.ObjectId, ref: 'Color' },
     patternId: { type: mongoose.Schema.Types.ObjectId, ref: 'Pattern' },
+    patternUrl: { type: String, default: '' },
     hex: { type: String, default: '' },
     opacity: { type: Number, default: 0.7, min: 0, max: 1 },
     finish: { type: String, enum: ['matte', 'satin', 'glossy'], default: 'matte' },

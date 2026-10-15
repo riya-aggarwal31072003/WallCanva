@@ -25,4 +25,14 @@ export class ColorService {
   toggleFavourite(id: string) {
     return this.http.post<string[]>(`${environment.apiUrl}/users/favourites/colors/${id}`, {});
   }
+
+    create(data: Partial<PaintColor>) {
+    return this.http.post<PaintColor>(`${environment.apiUrl}/colors`, data);
+  }
+  update(id: string, data: Partial<PaintColor>) {
+    return this.http.put<PaintColor>(`${environment.apiUrl}/colors/${id}`, data);
+  }
+  remove(id: string) {
+    return this.http.delete(`${environment.apiUrl}/colors/${id}`);
+  }
 }
