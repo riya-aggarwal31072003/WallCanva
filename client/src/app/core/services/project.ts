@@ -12,6 +12,7 @@ export interface Selection {
   points: Point[];
   colorId?: string;
   patternId?: string;
+  patternUrl?: string;
   hex: string;
   opacity: number;
   finish?: 'matte' | 'satin' | 'glossy';
