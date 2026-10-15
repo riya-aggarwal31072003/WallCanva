@@ -73,9 +73,36 @@ exports.remove = async (req, res, next) => {
     const project = await findOwned(req.params.id, req.user._id);
     if (!project) return res.status(404).json({ message: 'Project not found' });
 
-    await cloudinary.uploader.destroy(project.imagePublicId);
+        const others = await Project.countDocuments({
+      imagePublicId: project.imagePublicId,
+      _id: { $ne: project._id },
+    });
+    if (others === 0) await cloudinary.uploader.destroy(project.imagePublicId);
     await project.deleteOne();
     res.json({ message: 'Project deleted' });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.duplicate = async (req, res, next) => {
+  try {
+    const src = await findOwned(req.params.id, req.user._id);
+    if (!src) return res.status(404).json({ message: 'Project not found' });
+
+    const selections = JSON.parse(JSON.stringify(src.selections)).map((s) => {
+      delete s._id;
+      return s;
+    });
+
+    const copy = await Project.create({
+      owner: req.user._id,
+      title: `${src.title} (copy)`,
+      originalImageUrl: src.originalImageUrl,
+      imagePublicId: src.imagePublicId,
+      selections,
+    });
+    res.status(201).json(copy);
   } catch (err) {
     next(err);
   }
