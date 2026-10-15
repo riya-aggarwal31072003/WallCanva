@@ -1,1 +1,49 @@
-<p>admin-colors works!</p>
+<h2>Manage colours and patterns</h2>
+@if (error()) { <div class="alert">{{ error() }}</div> }
+
+<section class="panel">
+  <h3>{{ editingId() ? 'Edit colour' : 'Add colour' }}</h3>
+  <div class="row">
+    <input type="text" placeholder="Name" [value]="name()" (input)="name.set($any($event.target).value)" />
+    <input type="color" [value]="hex()" (input)="hex.set($any($event.target).value)" />
+    <input type="text" placeholder="Brand" [value]="brand()" (input)="brand.set($any($event.target).value)" />
+    <span class="preview" [style.background]="hex()"></span>
+    <button type="button" (click)="saveColor()">{{ editingId() ? 'Update' : 'Add' }}</button>
+    @if (editingId()) { <button type="button" class="secondary" (click)="resetColorForm()">Cancel</button> }
+  </div>
+
+  <table>
+    <tr><th>Swatch</th><th>Name</th><th>Hex</th><th>Brand</th><th></th></tr>
+    @for (c of colors(); track c._id) {
+      <tr>
+        <td><span class="preview" [style.background]="c.hex"></span></td>
+        <td>{{ c.name }}</td><td>{{ c.hex }}</td><td>{{ c.brand }}</td>
+        <td>
+          <button type="button" class="link" (click)="editColor(c)">Edit</button>
+          <button type="button" class="link danger" (click)="deleteColor(c)">Delete</button>
+        </td>
+      </tr>
+    }
+  </table>
+</section>
+
+<section class="panel">
+  <h3>Add pattern</h3>
+  <div class="row">
+    <input type="text" placeholder="Name" [value]="pName()" (input)="pName.set($any($event.target).value)" />
+    <input type="text" placeholder="Category (Floral, Geometric...)" [value]="pCategory()"
+           (input)="pCategory.set($any($event.target).value)" />
+    <input type="file" accept="image/jpeg,image/png" (change)="onPatternFile($event)" />
+    <button type="button" (click)="savePattern()">Upload</button>
+  </div>
+
+  <div class="patterns">
+    @for (p of patterns(); track p._id) {
+      <div class="pcard">
+        <img [src]="p.imageUrl" [alt]="p.name" />
+        <small>{{ p.name }} · {{ p.category }}</small>
+        <button type="button" class="link danger" (click)="deletePattern(p)">Delete</button>
+      </div>
+    }
+  </div>
+</section>
