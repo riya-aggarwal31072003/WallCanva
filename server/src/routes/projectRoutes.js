@@ -11,6 +11,7 @@ router.post('/upload', upload.single('image'), c.upload);
 router.get('/', c.list);
 router.get('/:id', c.getOne);
 router.put('/:id', c.update);
+router.post('/:id/duplicate', c.duplicate);
 router.delete('/:id', c.remove);
 
 module.exports = router;

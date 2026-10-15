@@ -1,5 +1,5 @@
 import {
-  AfterViewInit, Component, ElementRef, HostListener, ViewChild, inject, signal,
+  AfterViewInit, Component, ElementRef, HostListener, ViewChild, computed, inject, signal,
 } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Point, Project, ProjectService, Selection } from '../../core/services/project';
@@ -39,6 +39,10 @@ export class Editor implements AfterViewInit {
 
       saving = signal(false);
   saveMessage = signal('');
+    favIds = signal<string[]>([]);
+  onlyFavs = signal(false);
+  visibleColors = computed(() =>
+    this.onlyFavs() ? this.colors().filter((c) => this.favIds().includes(c._id)) : this.colors());
       
   private undoStack: Selection[][] = [];
   private redoStack: Selection[][] = [];
@@ -68,6 +72,7 @@ export class Editor implements AfterViewInit {
       },
     });
     this.colorsApi.list().subscribe((c) => this.colors.set(c));
+    this.colorsApi.favourites().subscribe((f) => this.favIds.set(f));
   }
 
   private loadImage(url: string) {
@@ -421,5 +426,8 @@ export class Editor implements AfterViewInit {
         this.saveMessage.set(err.error?.message || 'Save failed');
       },
     });
+  }
+  toggleFav(c: PaintColor) {
+    this.colorsApi.toggleFavourite(c._id).subscribe((f) => this.favIds.set(f));
   }
 }

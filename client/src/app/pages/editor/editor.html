@@ -20,12 +20,23 @@
   <span class="hint">{{ saveMessage() }}</span>
 </div>
 
+<label class="slider">
+  <input type="checkbox" [checked]="onlyFavs()" (change)="onlyFavs.set($any($event.target).checked)" />
+  Favourites only
+</label>
+
 <div class="palette">
-  @for (c of colors(); track c._id) {
-    <button type="button" class="swatch" [style.background]="c.hex"
-            [title]="c.name" (click)="pickColor(c)"></button>
+  @for (c of visibleColors(); track c._id) {
+    <span class="sw">
+      <button type="button" class="swatch" [style.background]="c.hex"
+              [title]="c.name" (click)="pickColor(c)"></button>
+      <button type="button" class="fav" (click)="toggleFav(c)"
+              [title]="favIds().includes(c._id) ? 'Remove favourite' : 'Add favourite'">
+        {{ favIds().includes(c._id) ? '★' : '☆' }}
+      </button>
+    </span>
   }
-  @if (!colors().length) { <small>No colours yet. Add some as admin.</small> }
+  @if (!visibleColors().length) { <small>No colours to show.</small> }
 </div>
 
 <label class="slider">

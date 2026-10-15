@@ -1,1 +1,31 @@
-<p>dashboard works!</p>
+<div class="head">
+  <h2>My designs</h2>
+  <a class="btn" routerLink="/upload">New design</a>
+</div>
+
+@if (loading()) { <p>Loading...</p> }
+@if (error()) { <div class="alert">{{ error() }}</div> }
+
+@if (!loading() && !projects().length) {
+  <p class="empty">No designs yet. Upload a room photo to get started.</p>
+}
+
+<div class="grid">
+  @for (p of projects(); track p._id) {
+    <div class="card">
+      <a [routerLink]="['/editor', p._id]">
+        <img [src]="p.originalImageUrl" [alt]="p.title" loading="lazy" />
+      </a>
+      <div class="info">
+        <strong>{{ p.title }}</strong>
+        <small>{{ p.selections.length }} area(s) · {{ p.updatedAt | date:'mediumDate' }}</small>
+      </div>
+      <div class="actions">
+        <a [routerLink]="['/editor', p._id]">Open</a>
+        <button type="button" (click)="rename(p)">Rename</button>
+        <button type="button" (click)="duplicate(p)">New trial</button>
+        <button type="button" class="danger" (click)="remove(p)">Delete</button>
+      </div>
+    </div>
+  }
+</div>
