@@ -5,6 +5,7 @@ import { ActivatedRoute } from '@angular/router';
 import { Point, Project, ProjectService, Selection } from '../../core/services/project';
 import { ColorService, PaintColor } from '../../core/services/color';
 import { DecimalPipe } from '@angular/common';
+import { PaintPattern, PatternService } from '../../core/services/pattern';
 
 @Component({
   selector: 'app-editor',
@@ -43,6 +44,9 @@ export class Editor implements AfterViewInit {
   onlyFavs = signal(false);
   visibleColors = computed(() =>
     this.onlyFavs() ? this.colors().filter((c) => this.favIds().includes(c._id)) : this.colors());
+  private patternApi = inject(PatternService);
+  patterns = signal<PaintPattern[]>([]);
+  private patternImgs = new Map<string, HTMLImageElement>();
       
   private undoStack: Selection[][] = [];
   private redoStack: Selection[][] = [];
@@ -73,6 +77,7 @@ export class Editor implements AfterViewInit {
     });
     this.colorsApi.list().subscribe((c) => this.colors.set(c));
     this.colorsApi.favourites().subscribe((f) => this.favIds.set(f));
+    this.patternApi.list().subscribe((p) => this.patterns.set(p));
   }
 
   private loadImage(url: string) {
@@ -269,8 +274,9 @@ export class Editor implements AfterViewInit {
       ctx.clip();
       ctx.globalAlpha = sel.opacity;
             ctx.globalCompositeOperation = sel.blend ?? 'multiply';
-      ctx.fillStyle = sel.hex;
-      ctx.fillRect(0, 0, c.width, c.height);
+            const pImg = sel.patternUrl ? this.getPatternImg(sel.patternUrl) : null;
+            ctx.fillStyle = pImg ? (ctx.createPattern(pImg, 'repeat') ?? sel.hex) : sel.hex;
+            ctx.fillRect(0, 0, c.width, c.height);
       ctx.restore();
 
       if (i === this.selectedIndex()) {
@@ -429,5 +435,26 @@ export class Editor implements AfterViewInit {
   }
   toggleFav(c: PaintColor) {
     this.colorsApi.toggleFavourite(c._id).subscribe((f) => this.favIds.set(f));
+  }
+    pickPattern(p: PaintPattern) {
+    this.snapshot();
+    this.applyToSelected({ patternId: p._id, patternUrl: p.imageUrl });
+  }
+
+  clearPattern() {
+    this.snapshot();
+    this.applyToSelected({ patternId: undefined, patternUrl: '' });
+  }
+
+  private getPatternImg(url: string): HTMLImageElement | null {
+    let img = this.patternImgs.get(url);
+    if (!img) {
+      img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => this.redraw();
+      img.src = url;
+      this.patternImgs.set(url, img);
+    }
+    return img.complete && img.naturalWidth ? img : null;
   }
 }
