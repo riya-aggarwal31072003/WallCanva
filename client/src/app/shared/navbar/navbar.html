@@ -5,7 +5,9 @@
     @if (auth.isLoggedIn()) {
       <a routerLink="/dashboard" routerLinkActive="active">My Designs</a>
       <a routerLink="/upload" routerLinkActive="active">New Design</a>
+      <a routerLink="/feedback" routerLinkActive="active">Feedback</a>
       @if (auth.isAdmin()) {
+        <a routerLink="/admin/dashboard" routerLinkActive="active">Analytics</a>
         <a routerLink="/admin/colors" routerLinkActive="active">Colours</a>
         <a routerLink="/admin/users" routerLinkActive="active">Users</a>
       }

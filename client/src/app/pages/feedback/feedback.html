@@ -1,0 +1,17 @@
+<div class="card">
+  @if (done()) {
+    <h2>Thank you!</h2>
+    <p>Your feedback helps us improve WallCanva.</p>
+  } @else {
+    <h2>How was your experience?</h2>
+    <div class="stars">
+      @for (s of stars; track s) {
+        <button type="button" [class.on]="s <= rating()" (click)="rating.set(s)">★</button>
+      }
+    </div>
+    <textarea rows="4" maxlength="500" placeholder="Anything we can improve? (optional)"
+              (input)="comment.set($any($event.target).value)"></textarea>
+    @if (error()) { <div class="alert">{{ error() }}</div> }
+    <button type="button" class="send" (click)="submit()">Send feedback</button>
+  }
+</div>

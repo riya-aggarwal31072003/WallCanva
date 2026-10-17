@@ -1,0 +1,29 @@
+<h2>Analytics</h2>
+@if (error()) { <div class="alert">{{ error() }}</div> }
+
+@if (stats(); as s) {
+  <div class="kpis">
+    <div class="kpi"><span>{{ s.imagesUploaded }}</span>Room images uploaded</div>
+    <div class="kpi"><span>{{ s.designsSaved }}</span>Designs saved</div>
+    <div class="kpi"><span>{{ s.totalUsers }}</span>Users</div>
+    <div class="kpi"><span>{{ s.avgSessionMinutes }} min</span>Avg session ({{ s.sessionCount }})</div>
+    <div class="kpi"><span>{{ s.avgRating }} / 5</span>Satisfaction ({{ s.feedbackCount }})</div>
+  </div>
+}
+
+<div class="charts">
+  <section class="panel"><h3>New users per week</h3><canvas #usersChart></canvas></section>
+  <section class="panel"><h3>Uploads and saved designs</h3><canvas #kpiChart></canvas></section>
+</div>
+
+<section class="panel">
+  <h3>Recent feedback</h3>
+  @if (!feedback().length) { <p class="empty">No feedback yet.</p> }
+  @for (f of feedback(); track f._id) {
+    <div class="fb">
+      <strong>{{ f.user?.name || 'User' }}</strong> · {{ '★'.repeat(f.rating) }}{{ '☆'.repeat(5 - f.rating) }}
+      <small>{{ f.createdAt | date:'mediumDate' }}</small>
+      @if (f.comment) { <p>{{ f.comment }}</p> }
+    </div>
+  }
+</section>

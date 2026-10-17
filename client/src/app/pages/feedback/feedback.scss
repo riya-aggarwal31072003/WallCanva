@@ -1,0 +1,6 @@
+.card { max-width: 480px; margin: 24px auto; background: #fff; padding: 28px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,.08); display: flex; flex-direction: column; gap: 14px; }
+.stars button { background: none; border: 0; font-size: 34px; color: #d1d5db; cursor: pointer; }
+.stars button.on { color: #f59e0b; }
+textarea { padding: 10px; border: 1px solid #d1d5db; border-radius: 4px; font: inherit; }
+.send { padding: 11px; background: #2563eb; color: #fff; border: 0; border-radius: 4px; cursor: pointer; }
+.alert { background: #fee2e2; color: #991b1b; padding: 10px; border-radius: 4px; }
