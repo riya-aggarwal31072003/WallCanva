@@ -8,6 +8,7 @@ const colorRoutes = require('./routes/colorRoutes');
 const patternRoutes = require('./routes/patternRoutes');
 const projectRoutes = require('./routes/projectRoutes');
 const userRoutes = require('./routes/userRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 
 const app = express();
 
@@ -26,5 +27,6 @@ app.use('/api/patterns', patternRoutes);
 app.use(errorHandler);
 app.use('/api/projects', projectRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/admin', adminRoutes);
 
 module.exports = app;
