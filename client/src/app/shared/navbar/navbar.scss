@@ -43,3 +43,7 @@
     cursor: pointer;
   }
 }
+@media (max-width: 800px) {
+  .nav { height: auto; flex-wrap: wrap; padding: 8px 12px; gap: 6px; }
+  .links { flex-wrap: wrap; gap: 10px; }
+}

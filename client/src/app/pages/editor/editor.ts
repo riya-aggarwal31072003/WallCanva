@@ -6,6 +6,7 @@ import { Point, Project, ProjectService, Selection } from '../../core/services/p
 import { ColorService, PaintColor } from '../../core/services/color';
 import { DecimalPipe } from '@angular/common';
 import { PaintPattern, PatternService } from '../../core/services/pattern';
+import { ToastService } from '../../core/services/toast';
 
 @Component({
   selector: 'app-editor',
@@ -30,6 +31,7 @@ export class Editor implements AfterViewInit {
   selections = signal<Selection[]>([]);
 
   private colorsApi = inject(ColorService);
+  private toast = inject(ToastService);
   colors = signal<PaintColor[]>([]);
   activeHex = signal('#4A90B8');
   activeColorId = signal<string | undefined>(undefined);
@@ -425,11 +427,13 @@ export class Editor implements AfterViewInit {
       next: () => {
         this.saving.set(false);
         this.saveMessage.set('Saved');
+        this.toast.success('Design saved');
         setTimeout(() => this.saveMessage.set(''), 2000);
       },
       error: (err) => {
         this.saving.set(false);
         this.saveMessage.set(err.error?.message || 'Save failed');
+        this.toast.error(err.error?.message || 'Save failed');
       },
     });
   }
