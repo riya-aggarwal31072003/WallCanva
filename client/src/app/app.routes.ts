@@ -39,5 +39,20 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./pages/admin-users/admin-users').then((m) => m.AdminUsers),
   },
+    {
+    path: 'admin/dashboard',
+    canActivate: [adminGuard],
+    loadComponent: () =>
+      import('./pages/admin-dashboard/admin-dashboard').then((m) => m.AdminDashboard),
+  },
+   {
+    path: 'feedback',
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/feedback/feedback').then((m) => m.Feedback),
+  },
+    {
+    path: 'help',
+    loadComponent: () => import('./pages/help/help').then((m) => m.Help),
+  },
   { path: '**', redirectTo: 'dashboard' },
 ];

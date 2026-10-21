@@ -1,0 +1,14 @@
+.panel { background: #fff; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,.06); }
+.row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 14px; }
+input[type='text'] { padding: 8px; border: 1px solid #d1d5db; border-radius: 4px; }
+button { padding: 8px 14px; background: #2563eb; color: #fff; border: 0; border-radius: 4px; cursor: pointer; }
+button.secondary { background: #6b7280; }
+button.link { background: none; color: #2563eb; padding: 0 6px; }
+button.danger { color: #dc2626; }
+.preview { display: inline-block; width: 28px; height: 28px; border-radius: 50%; border: 1px solid #9ca3af; }
+table { width: 100%; border-collapse: collapse; }
+th, td { text-align: left; padding: 8px; border-bottom: 1px solid #e5e7eb; }
+.patterns { display: flex; flex-wrap: wrap; gap: 14px; }
+.pcard { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; width: 130px; }
+.pcard img { width: 130px; height: 90px; object-fit: cover; border-radius: 4px; }
+.alert { background: #fee2e2; color: #991b1b; padding: 10px; border-radius: 4px; margin-bottom: 12px; }

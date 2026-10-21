@@ -1,1 +1,38 @@
-<p>admin-users works!</p>
+<h2>Users</h2>
+@if (loading()) { <p>Loading...</p> }
+@if (error()) { <div class="alert">{{ error() }}</div> }
+
+<table>
+  <tr><th>Name</th><th>Email</th><th>Role</th><th>Joined</th><th>Designs</th><th></th></tr>
+  @for (u of users(); track u._id) {
+    <tr [class.active]="selected()?._id === u._id">
+      <td>{{ u.name }}</td>
+      <td>{{ u.email }}</td>
+      <td><span class="badge" [class.admin]="u.role === 'admin'">{{ u.role }}</span></td>
+      <td>{{ u.createdAt | date:'mediumDate' }}</td>
+      <td>{{ u.projectCount }}</td>
+      <td><button type="button" class="link" (click)="view(u)">View designs</button></td>
+    </tr>
+  }
+</table>
+
+@if (selected(); as u) {
+  <section class="panel">
+    <div class="head">
+      <h3>{{ u.name }}'s designs</h3>
+      <button type="button" class="link" (click)="close()">Close</button>
+    </div>
+    @if (!projects().length) { <p class="empty">No designs yet.</p> }
+    <div class="grid">
+      @for (p of projects(); track p._id) {
+        <div class="card">
+          <img [src]="p.originalImageUrl" [alt]="p.title" loading="lazy" />
+          <div class="info">
+            <strong>{{ p.title }}</strong>
+            <small>{{ p.selections.length }} area(s) · {{ p.updatedAt | date:'mediumDate' }}</small>
+          </div>
+        </div>
+      }
+    </div>
+  </section>
+}

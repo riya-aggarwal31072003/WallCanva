@@ -1,0 +1,38 @@
+import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
+
+export interface PaintColor {
+  _id: string;
+  name: string;
+  hex: string;
+  brand?: string;
+  finishes?: string[];
+  tags?: string[];
+}
+
+@Injectable({ providedIn: 'root' })
+export class ColorService {
+  private http = inject(HttpClient);
+  list() {
+    return this.http.get<PaintColor[]>(`${environment.apiUrl}/colors`);
+  }
+
+    favourites() {
+    return this.http.get<string[]>(`${environment.apiUrl}/users/favourites/colors`);
+  }
+
+  toggleFavourite(id: string) {
+    return this.http.post<string[]>(`${environment.apiUrl}/users/favourites/colors/${id}`, {});
+  }
+
+    create(data: Partial<PaintColor>) {
+    return this.http.post<PaintColor>(`${environment.apiUrl}/colors`, data);
+  }
+  update(id: string, data: Partial<PaintColor>) {
+    return this.http.put<PaintColor>(`${environment.apiUrl}/colors/${id}`, data);
+  }
+  remove(id: string) {
+    return this.http.delete(`${environment.apiUrl}/colors/${id}`);
+  }
+}

@@ -1,4 +1,6 @@
 <app-navbar />
+@if (loading.active()) { <div class="bar"></div> }
+<app-toast />
 <main class="page">
   <router-outlet />
 </main>

@@ -1,1 +1,109 @@
-<p>editor works!</p>
+<h2>{{ project()?.title ?? 'Editor' }}</h2>
+
+@if (loading()) { <p>Loading image...</p> }
+@if (error()) { <div class="alert">{{ error() }}</div> }
+
+<div class="toolbar">
+  @if (!drawing()) {
+    <button type="button" (click)="startPolygon()">Select wall area</button>
+  } @else {
+    <button type="button" (click)="undoPoint()">Undo point</button>
+    <button type="button" class="secondary" (click)="cancelPolygon()">Cancel</button>
+    <span class="hint">Click to add points. Click the red point to close the shape.</span>
+  }
+  <button type="button" class="secondary" [disabled]="!canUndo()" (click)="undo()">Undo</button>
+  <button type="button" class="secondary" [disabled]="!canRedo()" (click)="redo()">Redo</button>
+  <button type="button" (click)="download()">Download image</button>
+  <button type="button" [disabled]="saving()" (click)="save()">
+    {{ saving() ? 'Saving...' : 'Save design' }}
+  </button>
+  <span class="hint">{{ saveMessage() }}</span>
+</div>
+
+<label class="slider">
+  <input type="checkbox" [checked]="onlyFavs()" (change)="onlyFavs.set($any($event.target).checked)" />
+  Favourites only
+</label>
+
+<div class="palette">
+  @for (c of visibleColors(); track c._id) {
+    <span class="sw">
+      <button type="button" class="swatch" [style.background]="c.hex"
+              [title]="c.name" (click)="pickColor(c)"></button>
+      <button type="button" class="fav" (click)="toggleFav(c)"
+              [title]="favIds().includes(c._id) ? 'Remove favourite' : 'Add favourite'">
+        {{ favIds().includes(c._id) ? '★' : '☆' }}
+      </button>
+    </span>
+  }
+  @if (!visibleColors().length) { <small>No colours to show.</small> }
+</div>
+
+<div class="palette">
+  <strong>Patterns:</strong>
+  @for (p of patterns(); track p._id) {
+    <button type="button" class="pat" [title]="p.name" (click)="pickPattern(p)">
+      <img [src]="p.imageUrl" [alt]="p.name" />
+    </button>
+  }
+  <button type="button" class="secondary-btn" (click)="clearPattern()">No pattern</button>
+  @if (!patterns().length) { <small>No patterns yet. Add some as admin.</small> }
+</div>
+
+<label class="slider">
+  Opacity {{ (opacity() * 100) | number:'1.0-0' }}%
+  <input type="range" min="0" max="1" step="0.05"
+       [value]="opacity()"
+       (pointerdown)="startOpacityChange()"
+       (input)="setOpacity(+$any($event.target).value)" />
+</label>
+<label class="slider">
+  Blend
+  <select (change)="setBlend($any($event.target).value)" [value]="blend()">
+    <option value="multiply">Multiply (keeps shadows)</option>
+    <option value="overlay">Overlay (stronger colour)</option>
+    <option value="soft-light">Soft light (subtle)</option>
+  </select>
+</label>
+<label class="slider">
+  Before / After
+  <input type="range" min="0" max="100" step="1"
+         [value]="compare()" (input)="setCompare(+$any($event.target).value)" />
+  <small>{{ compare() }}% painted</small>
+</label>
+
+@if (selections().length > 1) {
+  <button type="button" class="secondary-btn" (click)="duplicateColorToAll()">
+    Use this colour on all areas
+  </button>
+}
+
+<div #stage class="stage">
+  <div class="wrap">
+    <canvas #base class="base"></canvas>
+    <canvas #overlay class="top"
+            [class.drawing]="drawing()"
+            [style.clip-path]="'inset(0 ' + (100 - compare()) + '% 0 0)'"
+            (click)="onCanvasClick($event)"
+            (mousemove)="onCanvasMove($event)"
+            (mousedown)="onCanvasDown($event)"
+            (mouseup)="onCanvasUp()"
+            (mouseleave)="onCanvasUp()"></canvas>
+  </div>
+</div>
+
+@if (selections().length) {
+  <div class="list">
+    <strong>Selections:</strong>
+    @for (s of selections(); track $index) {
+      <span class="chip" [class.active]="$index === selectedIndex()" (click)="selectArea($index)">
+        Area {{ $index + 1 }} ({{ s.points.length }} points)
+        <button type="button" (click)="deleteSelection($index); $event.stopPropagation()">x</button>
+      </span>
+    }
+  </div>
+}
+
+<p class="disclaimer">
+  Colours may vary due to lighting, screen calibration and wall texture.
+</p>

@@ -1,5 +1,24 @@
 const Pattern = require('../models/Pattern');
 
+const cloudinary = require('../config/cloudinary');
+
+function uploadBuffer(buffer) {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      { folder: 'wallcanva/patterns', resource_type: 'image' },
+      (err, result) => {
+        if (err) {
+          const e = new Error(err.message || 'Image upload failed');
+          e.status = err.http_code || 500;
+          return reject(e);
+        }
+        resolve(result);
+      }
+    );
+    stream.end(buffer);
+  });
+}
+
 const FIELDS = ['name', 'description', 'category', 'imageUrl', 'scale'];
 
 function pickFields(body) {
@@ -31,7 +50,10 @@ exports.getPattern = async (req, res, next) => {
 
 exports.createPattern = async (req, res, next) => {
   try {
-    res.status(201).json(await Pattern.create(pickFields(req.body)));
+    const data = pickFields(req.body);
+    if (req.file) data.imageUrl = (await uploadBuffer(req.file.buffer)).secure_url;
+    if (!data.imageUrl) return res.status(400).json({ message: 'Pattern image is required' });
+    res.status(201).json(await Pattern.create(data));
   } catch (err) {
     next(err);
   }
