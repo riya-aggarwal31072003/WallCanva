@@ -2,7 +2,7 @@
 
 Smart Wall Paint Visualizer: upload a photo of your room, select wall areas, and preview paint colours and patterns before you paint.
 
-**Live demo:** https://YOUR-APP.vercel.app
+**Live demo:** https://wall-canva.vercel.app/
 **API:** https://wallcanva-api.onrender.com/api/health
 (The API runs on a free plan, so the first request can take about 30 seconds.)
 
