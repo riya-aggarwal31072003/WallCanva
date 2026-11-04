@@ -77,5 +77,12 @@ Open http://localhost:4200.
 ## API endpoints
 See `docs/API.md`.
 
+## Future enhancements
+- AI-based automatic wall detection
+- Brush tool for freehand wall selection
+- Advanced textures and 3D previews
+- Lighting simulation (day and night modes)
+- Integration with paint brands and retailers
+
 ## Disclaimer
 Colours may vary due to lighting, screen calibration and wall texture. Treat the preview as a guide.
